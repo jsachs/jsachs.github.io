@@ -1,0 +1,234 @@
+
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="">
+
+        <title>The infrastructure for a link-shortener</title>
+
+        <link href="../assets/css/bootstrap.min.css?v=74eafcf200" rel="stylesheet">
+        <link href="../assets/css/octicons.css?v=74eafcf200" rel="stylesheet">
+        <link href="../assets/fonts/Lato/Lato.css?v=74eafcf200" rel="stylesheet">
+        <link href="../assets/css/app.css?v=74eafcf200" rel="stylesheet">
+        <link href="../assets/css/prism.css?v=74eafcf200" rel="stylesheet">
+        <link rel="shortcut icon" href="../favicon.ico">
+
+        <link rel="canonical" href="http://localhost:2368/the-infrastructure-for-a-link-shortener/">
+    <meta name="referrer" content="origin">
+    
+    <meta property="og:site_name" content="Something Smells Delicious">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="The infrastructure for a link-shortener">
+    <meta property="og:description" content="I recently read a very good programming interview question: &quot;explain the infrastructure for a link-shortener&quot;.  It's something used regularly and with little thought, and the question is phrased in a way that doesn't imply the need for deep technical knowledge....">
+    <meta property="og:url" content="http://localhost:2368/the-infrastructure-for-a-link-shortener/">
+    <meta property="article:published_time" content="2014-05-15T14:25:00.000Z">
+    <meta property="article:modified_time" content="2015-12-01T02:08:37.427Z">
+    
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="The infrastructure for a link-shortener">
+    <meta name="twitter:description" content="I recently read a very good programming interview question: &quot;explain the infrastructure for a link-shortener&quot;.  It's something used regularly and with little thought, and the question is phrased in a way that doesn't imply the need for deep technical knowledge....">
+    <meta name="twitter:url" content="http://localhost:2368/the-infrastructure-for-a-link-shortener/">
+    
+    <script type="application/ld+json">
+{
+    "@context": "http://schema.org",
+    "@type": "Article",
+    "publisher": "Something Smells Delicious",
+    "author": {
+        "@type": "Person",
+        "name": "Jacob Sachs",
+        "image": "http://localhost:2368/content/images/2015/11/10265642_10152464566146624_995061342322005102_o.jpg",
+        "url": "http://localhost:2368/author/jacob",
+        "sameAs": null,
+        "description": null
+    },
+    "headline": "The infrastructure for a link-shortener",
+    "url": "http://localhost:2368/the-infrastructure-for-a-link-shortener/",
+    "datePublished": "2014-05-15T14:25:00.000Z",
+    "dateModified": "2015-12-01T02:08:37.427Z",
+    "description": "I recently read a very good programming interview question: &quot;explain the infrastructure for a link-shortener&quot;.  It&#x27;s something used regularly and with little thought, and the question is phrased in a way that doesn&#x27;t imply the need for deep technical knowledge...."
+}
+    </script>
+
+    <meta name="generator" content="Ghost 0.7">
+    <link rel="alternate" type="application/rss+xml" title="Something Smells Delicious" href="http://localhost:2368/rss/">
+    </head>
+    <body>
+        <div id="wrap">
+            <div class="navbar navbar-inverse navbar-static-top">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand pull-left" href="http://localhost:2368"> Something Smells Delicious</a>
+        </div>
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <!--
+                <li><a href="#"><span class="octicon octicon-mention"></span> Follow me</a></li>
+                <li><a href="#"><span class="octicon octicon-mark-github"></span> Fork me</a></li>
+                -->
+                <li><a href="http://localhost:2368/rss/"><span class="octicon octicon-rss"></span> RSS</a></li>
+		<li><a href="http://localhost:2368/ghost/"><span class="octicon octicon-pencil"></span></a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+            
+
+
+<div class="container-fluid container-abitabove">
+    <div class="row">
+        <div class="col-lg-12 centered text-center container-withcover no-cover" style="">
+            <h1>The infrastructure for a link-shortener</h1>
+            <h3>
+                <time datetime="2014-05-15"><span class="mega-octicon octicon-calendar"></span> 2014-05-15 at 10:25</time>
+            </h3>
+        </div>
+    </div>
+</div>
+
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-10 col-lg-offset-1 centered">
+                        <main>
+    <article class="post">
+        <section class="posts">
+            <p>I recently read a very good programming interview question: "explain the infrastructure for a link-shortener".  It's something used regularly and with little thought, and the question is phrased in a way that doesn't imply the need for deep technical knowledge.  It's also the sort of question you could intelligently reason out with no prior knowledge.</p>
+
+<p>Even if you have never generated a shortened URL, you've almost certainly used one.  Links like bit.ly, ow.ly, and goo.gl all come from URL shortening services.  They are different businesses with different software, but they all rely on the same basic principles.</p>
+
+<p>Since we will need to store information in some way, let's start with a list. This is a very long list, and it will store millions of pairs of long and short URLs.  This list will come in the form of a table, with a unique ID column, a long URL column, and a short URL column.  Here's what it looks like:</p>
+
+<table>  
+  <col width="40">
+  <tr>
+    <th>id
+    </th><th>long_url 
+    </th><th>short_url
+  </th></tr>
+  <tr>
+    <td>1</td>
+    <td><a href="http://svbtle.com/the-infrastructure-for-a-link-shortener">http://svbtle.com/the-infrastructure-for-a-link-shortener</a></td> 
+    <td><a href="http://short.er/abcdef">http://short.er/abcdef</a></td>
+  </tr>
+  <tr>
+    <td>2</td>
+    <td><a href="http://svbtle.com/learning-french">http://svbtle.com/learning-french</a></td> 
+    <td><a href="http://short.er/123456">http://short.er/123456</a></td>
+  </tr>
+</table>
+
+<p>It makes sense to have the long and short URL in the same row, to simply translate back and forth. Why the unique ID?</p>
+
+<p>Consider this: the short URL will need to be unique, so that it only links to a single "real" URL.  But there could be multiple users who want their own, personal shortened version of a URL. To create the short versions, we need a starting point that is also unique--the ID.  We can use this ID in a function that will generate a unique URL for us.  The key is to determine which function to use.</p>
+
+<h2 id="option1identityfunction">Option 1: Identity Function</h2>
+
+<p>If our ID is 1, then the URL becomes <code>http://short.er/1</code>. And so on.  Our formula looks like: <code>ID --&gt; http://short.er/ID</code>.</p>
+
+<p>This works really well for a few hundred thousand URLs.  Even a few million.  But by the time we are in the billions, or trillions, our "shortened" URL is just as unwieldy as the original.  Fortunately, we can make a creative twist to our counting to give us many, many more options.</p>
+
+<h2 id="option2base62">Option 2: Base 62</h2>
+
+<p>What if when counting up, instead of going from 9 to 10, we went from 9 to a? Then we keep counting from a to z. And on from A to Z.  This gives us 62 "numerals" to use before adding another "digit".  As we count:  </p>
+
+<pre><code>...
+60 --&gt; Y  
+61 --&gt; Z  
+62 --&gt; 10  
+63 --&gt; 11  
+...
+</code></pre>
+
+<p>And so on.  Traditional URL shorteners use no more than six characters in the short version. With 62 different numerals possible at each position, this gives us 62^6 = 56.8 billion URLs. This is on the order of magnitude of websites on the internet, but not URLs. We would need to reuse, have expiration dates, etc.</p>
+
+<p>We still have a problem.  With several billion URLs, it would be very slow to count all the way through the table to find the proper pair each time we did a lookup. We need a way to quickly convert back and forth between base 10 and base 62.</p>
+
+<h2 id="option3baseconverter">Option 3:  Base Converter</h2>
+
+<p>We need to be able to go forwards and backwards.</p>
+
+<h3 id="frombase10">From Base 10:</h3>
+
+<p>Take your starting ID and divide by 62. The remainder becomes your first new "digit".  The quotient becomes your new starting number.  Continue this process until your starting number is less than 62, and use it as the last "digit". It is easiest to see the process with an example.  Let's say our starting number is 6666:  </p>
+
+<pre><code>6666/62 = 107, remainder of 32  
+107/62 = 1, remainder of 45  
+last digit is 1  
+our digits are: (1, 45, 32)  
+we convert these to: 1Iv  
+</code></pre>
+
+<h3 id="frombase62">From Base 62:</h3>
+
+<p>Now we reverse the process. We take our base 62 digits, and do a conversion back to a list of numbers in base 10. We then multiply powers of 62 by the digit in each place, and add them up. If we start with 1Iv:  </p>
+
+<pre><code>1Iv converts to: (1, 45, 32)  
+(1, 45, 32) = 1*62^2 + 45*62^1 + 32*62^0
+= 3844 + 2790 + 32
+= 6666
+</code></pre>
+
+<p>There you have it. There are many other improvements we can make, but this is the basic architecture.</p>
+            <hr>
+        </section>
+    </article>
+</main>
+
+<!-- remove this line and the last one to activate disqus. fill your disqus_shortname.
+
+<div id="comments">
+	<div id="disqus_thread"></div>
+	<script type="text/javascript">
+	    var disqus_shortname = ''; // required: put your disqus shortname here
+	    var disqus_identifier = ''; // do not change: if empty, will use document url. here, post id is used.
+	    (function() {
+	        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+	        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+	        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+	    })();
+	</script>
+	<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+	<a href="http://disqus.com" class="dsq-brlink">Comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+End Comments Code -->
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="footer">
+            <footer>
+    <div class="footer navbar-inverse text-center">
+      <div class="container">
+          <div class="row">
+              <div class="col-lg-10 col-lg-offset-1 centered">
+                © Copyright Something Smells Delicious • powered by Ghost • <a href="https://github.com/fabienwang/Ghost-Flat"><span class="octicon octicon-mark-github"></span> Ghost-Flat</a> theme
+              </div>
+          </div>
+      </div>
+  </div>
+</footer>
+        </div>
+
+        
+
+        <script src="../assets/js/jquery-1.10.1.min.js?v=74eafcf200"></script>
+        <script src="../assets/js/icheck.min.js?v=74eafcf200"></script>
+        <script src="../assets/js/jquery.fs.selecter.min.js?v=74eafcf200"></script>
+        <script src="../assets/js/jquery.fs.stepper.min.js?v=74eafcf200"></script>
+        <script src="../assets/js/bootstrap.min.js?v=74eafcf200"></script>
+        <script src="../assets/js/prism.js?v=74eafcf200"></script>
+        <script src="../assets/js/ghost-blog.js?v=74eafcf200"></script>
+    </body>
